@@ -34,7 +34,7 @@ orbs:
     jobs:
 
       publish:
-
+        description: Packages and publishes a Helm chart to AWS S3
         parameters:
 
           executor-image-tag:
@@ -67,7 +67,8 @@ orbs:
           - run:
               name: Test
               command: |
-                helm version
+                helm dependency update << parameters.chartPath >>
+                helm package << parameters.chartPath >>
 
           - run:
               name: Inspect
