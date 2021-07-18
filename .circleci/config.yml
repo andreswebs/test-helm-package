@@ -33,7 +33,7 @@ orbs:
 
     jobs:
 
-      chart_dir:
+      chart-dir:
 
         parameters:
 
@@ -69,7 +69,7 @@ orbs:
                 - << parameters.path >> 
             root: << parameters.workspaceRoot >>       
 
-      package_publish:
+      publish:
 
         parameters:
 
@@ -115,7 +115,7 @@ workflows:
 
   publish-chart:
     jobs:
-      - helm-aws-package/chart_dir:
+      - helm-aws-package/chart-dir:
           path: ./chart
       - helm-aws-package/publish:
           executor-image-tag: "3.6.3"
