@@ -9,7 +9,6 @@ orbs:
   helm-aws-package:
     
     executors:
-
       base:
         parameters:
           image-tag:
@@ -20,54 +19,18 @@ orbs:
         docker:
           - image: cimg/base:<< parameters.image-tag >>
 
-      helm:
-        parameters:
-          image-tag:
-            description: >-
-              The `alpine/helm` image tag to use. Defaults to `latest`.
-            type: string
-            default: latest
-        docker:
-          - image: alpine/helm:<< parameters.image-tag >>
-            # use alpine/helm:3.6.3
+    commands:
+      init:
+        description: Initialize the environment
+        steps:
+          - run:
+              name: Install Helm
+              command: |
+                    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 && \
+                    chmod 700 get_helm.sh && \
+                    ./get_helm.sh                
 
     jobs:
-
-      chart-dir:
-
-        parameters:
-
-          executor-image-tag:
-            description: >-
-              Image tag for the executor.
-            type: string
-            default: stable
-
-          workspaceRoot:
-            description: Workspace root path that is either an absolute path or a path relative to the working directory. Defaults to '.' (the working directory)
-            type: string            
-            default: .
-
-          path:
-            description: >-
-              Relative path to the Helm chart directory
-            type: string
-            default: .
-
-        executor:
-          name: base
-          image-tag: << parameters.executor-image-tag >>
-
-        steps:
-          - attach_workspace:
-              at: << parameters.workspaceRoot >>        
-
-          - checkout
-
-          - persist_to_workspace:
-              paths:
-                  - << parameters.path >> 
-              root: << parameters.workspaceRoot >>       
 
       publish:
 
@@ -77,11 +40,12 @@ orbs:
             description: >-
               Image tag for the executor.
             type: string
-            default: latest
+            default: stable
 
-          workspaceRoot:
-            description: Workspace root path that is either an absolute path or a path relative to the working directory. Defaults to '.' (the working directory)
-            type: string 
+          chart-path:
+            description: >-
+              Relative path to the Helm chart directory
+            type: string
             default: .
 
           s3_bucket_name:
@@ -92,13 +56,12 @@ orbs:
             default: CHARTMUSEUM_S3_BUCKET_NAME
 
         executor:
-          name: helm
-          image-tag: << parameters.executor-image-tag >> 
+          name: base
+          image-tag: << parameters.executor-image-tag >>
 
         steps:
-
-          - attach_workspace:
-              at: << parameters.workspaceRoot >>        
+          - init
+          - checkout
 
           - run:
               name: Test
@@ -115,6 +78,5 @@ workflows:
 
   publish-chart:
     jobs:
-      - helm-aws-package/chart-dir:
-          path: ./chart
       - helm-aws-package/publish
+          chart-path: ./chart
