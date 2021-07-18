@@ -4,7 +4,7 @@ orbs:
 
   build-tools: circleci/build-tools@2.9.1
 
-  aws-cli: circleci/aws-cli@1.3.0
+  aws-cli: circleci/aws-cli@2.0.3
 
   helm-aws-package:
     
@@ -56,24 +56,36 @@ orbs:
             type: env_var_name
             default: CHARTMUSEUM_S3_BUCKET_NAME
 
+          s3_object_key_prefix:
+            description: >-
+              String prefixed to object names uploaded to the S3 bucket
+            type: string
+            default: charts
+
         executor:
           name: base
           image-tag: << parameters.executor-image-tag >>
 
         steps:
           - init
+          - aws-cli/install
           - checkout
 
           - run:
-              name: Test
+              name: Package
               command: |
                 helm dependency update << parameters.chart-path >>
                 helm package << parameters.chart-path >>
 
-          - run:
-              name: Inspect
-              command: |
-                ls
+          - build-tools/ensure-command:
+              command: aws
+
+          # - run:
+          #     name: Upload
+          #     command: |
+          #       for file in *.tgz; do
+          #         aws s3 cp "$file" "s3://<< parameters.s3_bucket_name >>/<< parameters.s3_object_key_prefix >>/$file"
+          #       done
 
 workflows:
   version: 2
