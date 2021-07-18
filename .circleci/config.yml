@@ -1,0 +1,121 @@
+version: 2.1
+
+orbs:
+
+  build-tools: circleci/build-tools@2.9.1
+
+  aws-cli: circleci/aws-cli@1.3.0
+
+  helm-aws-package:
+    
+    executors:
+
+      base:
+        parameters:
+          image-tag:
+            description: >-
+              The `cimg/base` image tag to use. Defaults to `stable`.
+            type: string
+            default: stable
+        docker:
+          - image: cimg/base:<< parameters.image-tag >>
+
+      helm:
+        parameters:
+          image-tag:
+            description: >-
+              The `alpine/helm` image tag to use. Defaults to `latest`.
+            type: string
+            default: latest
+        docker:
+          - image: alpine/helm:<< parameters.image-tag >>
+            # use alpine/helm:3.6.3
+
+    jobs:
+
+      chart_dir:
+
+        parameters:
+
+          executor-image-tag:
+            description: >-
+              Image tag for the executor.
+            type: string
+            default: stable
+
+          workspaceRoot:
+            description: Workspace root path that is either an absolute path or a path relative to the working directory. Defaults to '.' (the working directory)
+            type: string            
+            default: .
+
+          path:
+            description: >-
+              Relative path to the Helm chart directory
+            type: string
+            default: .
+
+        executor:
+          name: base
+          image-tag: << parameters.executor-image-tag >>
+
+      steps:
+        - attach_workspace:
+            at: << parameters.workspaceRoot >>        
+
+        - checkout
+
+        - persist_to_workspace:
+            paths:
+                - << parameters.path >> 
+            root: << parameters.workspaceRoot >>       
+
+      package_publish:
+
+        parameters:
+
+          executor-image-tag:
+            description: >-
+              Image tag for the executor.
+            type: string
+            default: latest
+
+          workspaceRoot:
+            description: Workspace root path that is either an absolute path or a path relative to the working directory. Defaults to '.' (the working directory)
+            type: string 
+            default: .
+
+          s3_bucket_name:
+            description: >-
+              Env var containing the name of the S3 bucket used for chart storage
+              Defaults to `CHARTMUSEUM_S3_BUCKET_NAME`.
+            type: env_var_name
+            default: CHARTMUSEUM_S3_BUCKET_NAME
+
+        executor:
+          name: helm
+          image-tag: << parameters.executor-image-tag >> 
+
+        steps:
+
+          - attach_workspace:
+              at: << parameters.workspaceRoot >>        
+
+          - run:
+              name: Test
+              command: |
+                helm version
+
+          - run:
+              name: Inspect
+              command: |
+                ls
+
+workflows:
+  version: 2
+
+  publish-chart:
+    jobs:
+      - helm-aws-package/chart_dir:
+          path: ./chart
+      - helm-aws-package/publish:
+          executor-image-tag: "3.6.3"
