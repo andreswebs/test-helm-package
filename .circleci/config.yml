@@ -58,16 +58,16 @@ orbs:
           name: base
           image-tag: << parameters.executor-image-tag >>
 
-      steps:
-        - attach_workspace:
-            at: << parameters.workspaceRoot >>        
+        steps:
+          - attach_workspace:
+              at: << parameters.workspaceRoot >>        
 
-        - checkout
+          - checkout
 
-        - persist_to_workspace:
-            paths:
-                - << parameters.path >> 
-            root: << parameters.workspaceRoot >>       
+          - persist_to_workspace:
+              paths:
+                  - << parameters.path >> 
+              root: << parameters.workspaceRoot >>       
 
       publish:
 
