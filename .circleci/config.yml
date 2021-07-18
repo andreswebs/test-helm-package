@@ -2,12 +2,11 @@ version: 2.1
 
 orbs:
 
-  build-tools: circleci/build-tools@2.9.1
-
-  aws-cli: circleci/aws-cli@2.0.3
-
   helm-aws-package:
-    
+    orbs:
+      build-tools: circleci/build-tools@2.9.1
+      aws-cli: circleci/aws-cli@2.0.3
+
     executors:
       base:
         parameters:
