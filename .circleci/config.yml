@@ -59,7 +59,7 @@ orbs:
             description: >-
               String prefixed to object names uploaded to the S3 bucket
             type: string
-            default: charts
+            default: charts/
 
         executor:
           name: base
@@ -76,14 +76,11 @@ orbs:
                 helm dependency update << parameters.chart-path >>
                 helm package << parameters.chart-path >>
 
-          - build-tools/ensure-command:
-              command: aws
-
           # - run:
           #     name: Upload
           #     command: |
           #       for file in *.tgz; do
-          #         aws s3 cp "$file" "s3://<< parameters.s3_bucket_name >>/<< parameters.s3_object_key_prefix >>/$file"
+          #         aws s3 cp "${file}" "s3://<< parameters.s3_bucket_name >>/<< parameters.s3_object_key_prefix >>${file}"
           #       done
 
 workflows:
