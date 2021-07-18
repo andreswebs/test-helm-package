@@ -19,8 +19,8 @@ orbs:
           - image: cimg/base:<< parameters.image-tag >>
 
     commands:
-      init:
-        description: Initialize the environment
+      install-helm:
+        description: Install Helm using the official shell script
         steps:
           - run:
               name: Install Helm
@@ -66,7 +66,7 @@ orbs:
           image-tag: << parameters.executor-image-tag >>
 
         steps:
-          - init
+          - install-helm
           - aws-cli/install
           - checkout
 
