@@ -78,5 +78,5 @@ workflows:
 
   publish-chart:
     jobs:
-      - helm-aws-package/publish
+      - helm-aws-package/publish:
           chart-path: ./chart
