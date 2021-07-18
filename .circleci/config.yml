@@ -67,8 +67,8 @@ orbs:
           - run:
               name: Test
               command: |
-                helm dependency update << parameters.chartPath >>
-                helm package << parameters.chartPath >>
+                helm dependency update << parameters.chart-path >>
+                helm package << parameters.chart-path >>
 
           - run:
               name: Inspect
